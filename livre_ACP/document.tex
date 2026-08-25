@@ -1,0 +1,760 @@
+\documentclass[12pt,a4paper]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{chngcntr}
+
+% --- SUPPRESSION DES PAGES VIDES ---
+\let\cleardoublepage\clearpage
+
+% Configuration de la page
+\geometry{
+	a4paper,
+	left=2.5cm,
+	right=2.5cm,
+	top=2.5cm,
+	bottom=2.5cm
+}
+
+% Configuration des en-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\leftmark}
+\fancyfoot[CE,CO]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Configuration des titres de chapitres
+\titleformat{\chapter}[hang]{\Huge\bfseries}{}{0pt}{}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+% Numérotation des figures par chapitre
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+%emojie 
+\usepackage{pifont}
+\usepackage{xcolor}
+
+% Informations du livre
+\title{
+	\begin{center}
+		\includegraphics[width=1.1in,height=1.1in]{./logo/Logo_fac_science}
+		\hspace{9cm}
+		\includegraphics[width=1.1in,height=1.1in]{./logo/logo_MIT}
+	\end{center}
+	\vspace{-2.5cm}
+	\textbf{\textit{
+			Université d'Antananarivo\\[12pt]
+			Faculté des Sciences\\[15pt] 
+			Mention Informatique et Technologie (MIT)}\\[50pt]} \bigskip
+	\textsc{ grade	: \textbf{Master 1 }\\[2pt]}
+	Parcours: \textsc{\textbf{ Innovation et Technologie (INT)}} 
+	
+	\vfill	
+	\rule{0.75\textwidth}{3pt} \vspace{10pt}
+	\textbf{\\ANALYSE EN COMPOSANTES PRINCIPALES SUR R :\\
+	\Large \textbf{Étude des Habitudes de Vie Quotidienne}}
+	\rule{0.75\textwidth}{3pt}
+	\vfill
+	
+}
+
+\date{\today \\[25pt]
+	\textit{\textbf{Année universitaire : 2025 - 2026}}
+}
+\author{\underline{Nom:}\\[4pt]
+	 \textbf{RABESIHARISON Tolotraniaina Henri}\\[1.5pt] 
+}
+\begin{document}
+	
+	% --- TABLE DES MATIÈRES ---
+\pagenumbering{gobble}
+\maketitle
+\cleardoublepage
+\pagenumbering{roman}
+\addcontentsline{toc}{section}{Table des matières}
+\tableofcontents
+\cleardoublepage
+
+\pagenumbering{arabic}
+	% --- PRÉFACE (RACCOURCIE) ---
+	\chapter*{Préface}
+	\addcontentsline{toc}{chapter}{Préface}
+	\markboth{Préface}{Préface}
+	
+	\vspace{0.5cm}
+	
+	Ce livre propose une analyse statistique des habitudes de vie à travers l'\textbf{Analyse en Composantes Principales (ACP)}. 
+	
+	L'étude porte sur \textbf{15 individus} et \textbf{11 variables} : sommeil, écran, sport, eau, travail, stress, alimentation, café, humeur, social et qualité du sommeil.
+	
+	\vspace{0.3cm}
+	
+	L'objectif est de :
+	\begin{itemize}
+		\item Visualiser les relations entre les habitudes.
+		\item Identifier les profils types d'individus.
+		\item Comprendre les facteurs clés du bien-être.
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	
+	Ce document s'adresse aux étudiants et professionnels souhaitant découvrir l'ACP à travers un cas pratique.
+	
+	\vspace{0.3cm}
+	
+	\noindent \textit{Bonne lecture !}
+	
+	% --- CHAPITRE 1 : INTRODUCTION ---
+	\chapter{Introduction}
+	\markboth{Introduction}{Introduction}
+	
+	\section{Contexte de l'étude}
+	
+	Les habitudes de vie quotidienne ont un impact majeur sur la santé et le bien-être des individus. La sédentarité, le stress, une mauvaise alimentation ou un sommeil insuffisant sont autant de facteurs qui peuvent affecter négativement la qualité de vie.
+	
+	\vspace{0.5cm}
+	
+	Dans ce contexte, il est essentiel de comprendre :
+	\begin{itemize}
+		\item \textbf{Quelles habitudes sont liées entre elles ?}
+		\item \textbf{Quels sont les facteurs les plus influents ?}
+		\item \textbf{Existe-t-il des profils types d'individus ?}
+	\end{itemize}
+	
+	\section{Présentation des données}
+	
+	L'étude porte sur \textbf{15 individus} et \textbf{11 variables}. Le tableau ci-dessous présente un aperçu des données collectées :
+	
+	\vspace{0.5cm}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Présentation des données étudiées}
+		\begin{tabular}{lcccccc}
+			\toprule
+			\textbf{Individu} & \textbf{Sommeil} & \textbf{Ecran} & \textbf{Sport} & \textbf{Eau} & \textbf{Travail} & \textbf{Stress} \\
+			\midrule
+			Sarindra & 8.5 & 3 & 60 & 2.5 & 6 & 3 \\
+			Bob & 6.0 & 6 & 20 & 1.8 & 8 & 7 \\
+			Charlie & 7.0 & 4.5 & 40 & 2.0 & 7.5 & 5 \\
+			Diana & 8.0 & 2.5 & 70 & 3.0 & 6 & 2 \\
+			Elinoh & 5.5 & 7 & 10 & 1.5 & 9 & 8 \\
+			Franck & 7.5 & 5 & 45 & 2.2 & 7 & 6 \\
+			Miranto & 9.0 & 2 & 90 & 3.5 & 5 & 1 \\
+			Faniry & 6.5 & 6.5 & 15 & 1.6 & 8.5 & 8 \\
+			Toavina & 7.0 & 4 & 30 & 2.0 & 7 & 4 \\
+			Jack & 5.0 & 8 & 5 & 1.2 & 10 & 10 \\
+			Katy & 8.0 & 3.5 & 55 & 2.8 & 6.5 & 3 \\
+			Leonard & 6.5 & 5.5 & 35 & 2.0 & 8 & 6 \\
+			Mirotsy & 8.5 & 2.5 & 80 & 3.2 & 5.5 & 2 \\
+			Noah & 7.0 & 4 & 45 & 2.5 & 7.5 & 5 \\
+			Olivia & 6.0 & 7.5 & 25 & 1.8 & 9.5 & 9 \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\vspace{0.5cm}
+	
+	\section{Objectifs de l'étude}
+	
+	Les objectifs principaux de cette analyse sont :
+	
+	\begin{enumerate}
+		\item \textbf{Identifier les relations} entre les différentes habitudes de vie.
+		\item \textbf{Déterminer les facteurs} qui différencient le plus les individus.
+		\item \textbf{Classifier} les individus en profils types.
+		\item \textbf{Évaluer la qualité} de l'analyse statistique.
+	\end{enumerate}
+	
+	\section{Structure du rapport}
+	
+	Ce rapport est structuré en six chapitres :
+	
+	\begin{enumerate}
+		\item \textbf{Introduction} : Présentation du contexte, des données et des objectifs.
+		\item \textbf{Méthodologie} : Explication de l'Analyse en Composantes Principales.
+		\item \textbf{Cercle des corrélations} : Analyse des relations entre variables.
+		\item \textbf{Contribution des variables} : Importance de chaque facteur.
+		\item \textbf{Nuage des individus} : Profils types des personnes étudiées.
+		\item \textbf{Valeurs propres} : Qualité et fiabilité de l'analyse.
+	\end{enumerate}
+	
+	% --- CHAPITRE 2 : MÉTHODOLOGIE ---
+	\chapter{Méthodologie}
+	\markboth{Méthodologie}{Méthodologie}
+	
+	\section{L'Analyse en Composantes Principales (ACP)}
+	
+	L'\textbf{Analyse en Composantes Principales} est une méthode statistique multidimensionnelle qui permet de :
+	
+	\begin{itemize}
+		\item \textbf{Réduire} la dimensionnalité des données.
+		\item \textbf{Visualiser} les relations entre variables.
+		\item \textbf{Identifier} les structures sous-jacentes.
+	\end{itemize}
+	
+	\subsection{Principe de l'ACP}
+	
+	L'ACP transforme les variables initiales (corrélées entre elles) en de nouvelles variables non corrélées appelées \textbf{composantes principales}. Ces composantes sont classées par ordre d'importance décroissante.
+	
+	\vspace{0.5cm}
+	
+	\begin{center}
+		\fbox{
+			\begin{minipage}{0.8\textwidth}
+				\textbf{Formule mathématique :}
+				
+				\[
+				\begin{cases}
+					C_1 = a_{11}X_1 + a_{12}X_2 + \dots + a_{1p}X_p \\
+					C_2 = a_{21}X_1 + a_{22}X_2 + \dots + a_{2p}X_p \\
+					\vdots \\
+					C_p = a_{p1}X_1 + a_{p2}X_2 + \dots + a_{pp}X_p
+				\end{cases}
+				\]
+				
+				Où les $C_i$ sont les composantes principales et les $a_{ij}$ sont les coefficients (poids) calculés à partir des données.
+			\end{minipage}
+		}
+	\end{center}
+	
+	\subsection{Étapes de l'ACP}
+	
+	Le processus d'analyse se déroule en plusieurs étapes :
+	
+	\begin{enumerate}
+		\item \textbf{Standardisation} des données pour éviter l'influence des unités.
+		\item \textbf{Calcul de la matrice de corrélation}.
+		\item \textbf{Extraction des valeurs propres et des vecteurs propres}.
+		\item \textbf{Calcul des composantes principales}.
+		\item \textbf{Interprétation des résultats}.
+	\end{enumerate}
+	
+	\section{Description des variables}
+	
+	Le tableau ci-dessous présente les variables utilisées dans cette étude :
+	
+	\begin{table}[H]
+		\centering
+		\caption{Description des variables}
+		\begin{tabular}{lcp{8cm}}
+			\toprule
+			\textbf{Variable} & \textbf{Unité} & \textbf{Description} \\
+			\midrule
+			Sommeil & Heures & Durée de sommeil par nuit \\
+			Ecran & Heures & Temps passé devant un écran \\
+			Sport & Minutes & Temps de pratique sportive quotidienne \\
+			Eau & Litres & Consommation d'eau par jour \\
+			Travail & Heures & Temps de travail par jour \\
+			Stress & /10 & Niveau de stress ressenti \\
+			Alimentation & /10 & Qualité de l'alimentation \\
+			Café & Tasses & Consommation de café par jour \\
+			Humeur & /10 & Niveau de bien-être général \\
+			Social & Heures & Temps d'interactions sociales \\
+			Sommeil\_qualite & /10 & Qualité subjective du sommeil \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\section{Justification de l'ACP pour cette étude}
+	
+	L'ACP est particulièrement adaptée à cette étude car :
+	
+	\begin{itemize}
+		\item Les variables sont \textbf{nombreuses} (11 variables).
+		\item Il existe probablement des \textbf{corrélations} entre les variables.
+		\item Nous souhaitons \textbf{visualiser} les relations de manière simple.
+		\item Nous voulons \textbf{identifier} des profils types d'individus.
+	\end{itemize}
+	
+	% --- CHAPITRE 3 : CERCLE DES CORRÉLATIONS ---
+	\chapter{Cercle des Corrélations}
+	\markboth{Cercle des Corrélations}{Cercle des Corrélations}
+	
+	\section{Présentation du graphique}
+	
+	Le cercle des corrélations est un outil visuel essentiel de l'ACP. Il permet de visualiser :
+	
+	\begin{itemize}
+		\item Les \textbf{corrélations} entre les variables.
+		\item La \textbf{contribution} de chaque variable aux axes principaux.
+	\end{itemize}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{./img/cercle_corelation.png}
+		\caption{Cercle des corrélations - Relations entre les habitudes de vie}
+		\label{fig:cercle}
+	\end{figure}
+	
+	\section{Interprétation des axes}
+	
+	\subsection{Axe horizontal (Dimension 1)}
+	
+	L'axe horizontal est l'axe principal qui explique \textbf{52\%} de la variance totale.
+	
+	\begin{itemize}
+		\item \textbf{À droite} de l'axe : Variables associées à un style de vie "stressant et sédentaire" :
+		\begin{itemize}
+			\item \textcolor{red}{Travail}
+			\item \textcolor{red}{Ecran}
+			\item \textcolor{red}{Stress}
+		\end{itemize}
+		
+		\item \textbf{À gauche} de l'axe : Variables associées à un style de vie "sain et équilibré" :
+		\begin{itemize}
+			\item \textcolor{blue}{Sport}
+			\item \textcolor{blue}{Alimentation}
+			\item \textcolor{blue}{Sommeil\_qualite}
+			\item \textcolor{blue}{Humeur}
+		\end{itemize}
+	\end{itemize}
+	
+	\subsection{Axe vertical (Dimension 2)}
+	
+	L'axe vertical explique \textbf{21\%} de la variance totale. Il permet d'affiner les profils :
+	
+	\begin{itemize}
+		\item Il sépare les personnes qui dorment bien mais sont stressées de celles qui ne dorment pas bien mais sont calmes.
+		\item Il peut être lié à des facteurs comme la \textbf{consommation de café} ou les \textbf{interactions sociales}.
+	\end{itemize}
+	
+	\section{Groupes de variables identifiés}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Groupes de variables identifiés}
+		\begin{tabular}{p{5cm}p{5cm}}
+			\toprule
+			\textbf{Groupe "Stress/Sédentarité"} & \textbf{Groupe "Bien-être"} \\
+			\midrule
+			\textcolor{red}{Travail} & \textcolor{blue}{Sport} \\
+			\textcolor{red}{Ecran} & \textcolor{blue}{Alimentation} \\
+			\textcolor{red}{Stress} & \textcolor{blue}{Sommeil\_qualite} \\
+			\textcolor{red}{Café} & \textcolor{blue}{Humeur} \\
+			& \textcolor{blue}{Sommeil} \\
+			& \textcolor{blue}{Eau} \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\section{Conclusion du chapitre}
+	
+	Le cercle des corrélations met clairement en évidence \textbf{deux groupes opposés} d'habitudes de vie :
+	
+	\begin{enumerate}
+		\item Un groupe \textbf{négatif} associé au stress, au travail et à l'écran.
+		\item Un groupe \textbf{positif} associé au sport, à une bonne alimentation et à un sommeil de qualité.
+	\end{enumerate}
+	
+	Ces deux groupes sont fortement opposés le long de l'axe horizontal (Dimension 1).
+	
+	% --- CHAPITRE 4 : CONTRIBUTION DES VARIABLES ---
+	\chapter{Contribution des Variables}
+	\markboth{Contribution des Variables}{Contribution des Variables}
+	
+	\section{Présentation du graphique}
+	
+	Ce graphique montre la \textbf{contribution de chaque variable} à la construction des axes principaux.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{./img/contribution.png}
+		\caption{Contribution des variables à l'analyse}
+		\label{fig:contribution}
+	\end{figure}
+	
+	\section{Analyse des résultats}
+	
+	\subsection{Répartition des contributions}
+	
+	Le tableau ci-dessous présente les contributions détaillées de chaque variable :
+	
+	\begin{table}[H]
+		\centering
+		\caption{Contributions des variables}
+		\begin{tabular}{lcc}
+			\toprule
+			\textbf{Variable} & \textbf{Contribution (\%)} & \textbf{Rang} \\
+			\midrule
+			Travail & 16.9\% & 1 \\
+			Ecran & 16.8\% & 2 \\
+			Stress & 16.8\% & 3 \\
+			Sommeil & 16.6\% & 4 \\
+			Sport & 16.5\% & 5 \\
+			Eau & 16.4\% & 6 \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\subsection{Interprétation}
+	
+	\begin{itemize}
+		\item Toutes les variables contribuent de manière \textbf{quasi-équilibrée} (environ 16-17\%).
+		\item Les 3 variables les plus influentes sont :
+		\begin{enumerate}
+			\item \textbf{Travail} (16.9\%)
+			\item \textbf{Ecran} (16.8\%)
+			\item \textbf{Stress} (16.8\%)
+		\end{enumerate}
+		\item Le \textbf{Sport} (16.5\%) et le \textbf{Sommeil} (16.6\%) sont également des facteurs clés.
+		\item La \textbf{consommation d'eau} (16.4\%) ferme la marche des variables principales.
+	\end{itemize}
+	
+	\section{Conclusion du chapitre}
+	
+	\begin{center}
+		\fbox{
+			\begin{minipage}{0.85\textwidth}
+				\centering
+				\textbf{La qualité de vie est un phénomène multifactoriel.}
+				\vspace{0.2cm}
+				
+				Aucun facteur ne domine complètement les autres. Toutes les variables ont une importance similaire dans l'explication des différences entre les individus.
+			\end{minipage}
+		}
+	\end{center}
+	
+	\vspace{0.5cm}
+	
+	Cette répartition équilibrée montre que pour améliorer son bien-être, il est nécessaire d'agir simultanément sur \textbf{plusieurs aspects} de la vie quotidienne : le travail, le stress, le sommeil, le sport et l'alimentation.
+	
+	% --- CHAPITRE 5 : NUAGE DES INDIVIDUS ---
+	\chapter{Nuage des Individus}
+	\markboth{Nuage des Individus}{Nuage des Individus}
+	
+	\section{Présentation du graphique}
+	
+	Le nuage de points permet de \textbf{visualiser la position de chaque individu} dans l'espace défini par les axes principaux.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{./img/nuage_de_point.png}
+		\caption{Nuage de points - Taille selon le Stress, Couleur selon le Sport}
+		\label{fig:nuage}
+	\end{figure}
+	
+	\section{Légende du graphique}
+	
+	\begin{itemize}
+		\item \textbf{Couleur des points} : Indique le niveau de pratique sportive
+		\begin{itemize}
+			\item \textcolor{blue}{Bleu} = Beaucoup de sport
+			\item \textcolor{red}{Rouge} = Peu de sport
+		\end{itemize}
+		\item \textbf{Taille des points} : Indique le niveau de stress
+		\begin{itemize}
+			\item \textcolor{red}{\Large •} = Stress élevé
+			\item \textcolor{blue}{\small •} = Stress faible
+		\end{itemize}
+	\end{itemize}
+	
+	\section{Identification des profils types}
+	
+	\subsection{Profil 1 : Le mode de vie "sain" (Gauche du graphique)}
+	
+	Ces personnes se caractérisent par :
+	
+	\begin{itemize}
+		\item \textcolor{blue}{Beaucoup de sport} (couleur bleue)
+		\item \textcolor{blue}{Faible stress} (petite taille)
+		\item Moins de temps d'écran
+		\item Meilleure alimentation
+		\item Bonne qualité de sommeil
+	\end{itemize}
+	
+	\textbf{Exemples d'individus :}
+	\begin{enumerate}
+		\item \textbf{Miranto} : 90 min de sport, stress 1/10
+		\item \textbf{Mirotsy} : 80 min de sport, stress 2/10
+		\item \textbf{Diana} : 70 min de sport, stress 2/10
+	\end{enumerate}
+	
+	\subsection{Profil 2 : Le mode de vie "stressé" (Droite du graphique)}
+	
+	Ces personnes se caractérisent par :
+	
+	\begin{itemize}
+		\item \textcolor{red}{Peu de sport} (couleur rouge)
+		\item \textcolor{red}{Stress élevé} (grande taille)
+		\item Beaucoup de temps d'écran
+		\item Forte charge de travail
+		\item Moins bonne qualité de sommeil
+	\end{itemize}
+	
+	\textbf{Exemples d'individus :}
+	\begin{enumerate}
+		\item \textbf{Jack} : 5 min de sport, stress 10/10
+		\item \textbf{Olivia} : 25 min de sport, stress 9/10
+		\item \textbf{Elinoh} : 10 min de sport, stress 8/10
+	\end{enumerate}
+	
+	\section{Analyse des cas extrêmes}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Cas extrêmes de l'étude}
+		\begin{tabular}{lcccc}
+			\toprule
+			\textbf{Individu} & \textbf{Ecran} & \textbf{Sport} & \textbf{Stress} & \textbf{Profil} \\
+			\midrule
+			\textcolor{red}{Jack} & 8h & 5 min & 10/10 & \textcolor{red}{Stressé, sédentaire} \\
+			\textcolor{red}{Olivia} & 7.5h & 25 min & 9/10 & \textcolor{red}{Stressée, sédentaire} \\
+			\textcolor{red}{Elinoh} & 7h & 10 min & 8/10 & \textcolor{red}{Stressée, sédentaire} \\
+			\midrule
+			\textcolor{blue}{Miranto} & 2h & 90 min & 1/10 & \textcolor{blue}{Sain, sportif} \\
+			\textcolor{blue}{Mirotsy} & 2.5h & 80 min & 2/10 & \textcolor{blue}{Sain, sportif} \\
+			\textcolor{blue}{Diana} & 2.5h & 70 min & 2/10 & \textcolor{blue}{Sain, sportif} \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\section{Conclusion du chapitre}
+	
+	Le nuage de points confirme la \textbf{séparation nette} entre deux styles de vie :
+	
+	\begin{enumerate}
+		\item \textbf{Style de vie sain} : Sportif, faible stress, bien-être.
+		\item \textbf{Style de vie stressé} : Sédentaire, stress élevé, mauvaise qualité de vie.
+	\end{enumerate}
+	
+	Les cas extrêmes (Jack, Olivia, Miranto, Mirotsy) sont les principaux "moteurs" de l'analyse. Ils créent les deux groupes distincts observés.
+	
+	% --- CHAPITRE 6 : VALEURS PROPRES ---
+	\chapter{Valeurs Propres - Qualité de l'Analyse}
+	\markboth{Valeurs Propres}{Valeurs Propres}
+	
+	\section{Présentation du graphique}
+	
+	Les valeurs propres indiquent \textbf{l'importance de chaque axe} (dimension) dans l'analyse.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{./img/valeurs_propres.png}
+		\caption{Valeurs propres - Pourcentage de variance expliquée}
+		\label{fig:vp}
+	\end{figure}
+	
+	\section{Définition des valeurs propres}
+	
+	Les \textbf{valeurs propres} (ou "eigenvalues") sont des nombres qui mesurent l'importance de chaque axe.
+	
+	\begin{itemize}
+		\item \textbf{Plus la valeur propre est grande} = Plus l'axe est important.
+		\item La somme de toutes les valeurs propres = 100\% de l'information.
+	\end{itemize}
+	
+	\begin{center}
+		\fbox{
+			\begin{minipage}{0.8\textwidth}
+				\centering
+				\textbf{Formule :}
+				\[
+				\lambda_i = \text{Variance expliquée par la dimension } i
+				\]
+				\[
+				\text{Pourcentage expliqué} = \frac{\lambda_i}{\sum \lambda_j} \times 100
+				\]
+			\end{minipage}
+		}
+	\end{center}
+	
+	\section{Résultats de l'analyse}
+	
+	\subsection{Pourcentages de variance expliquée}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Résultats des valeurs propres}
+		\begin{tabular}{ccc}
+			\toprule
+			\textbf{Dimension} & \textbf{Variance expliquée (\%)} & \textbf{Cumul (\%)} \\
+			\midrule
+			Dimension 1 & 52.0\% & 52.0\% \\
+			Dimension 2 & 21.0\% & 73.0\% \\
+			Dimension 3 & 1.2\% & 74.2\% \\
+			Dimension 4 & 0.4\% & 74.6\% \\
+			Dimension 5 & 0.3\% & 74.9\% \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\subsection{Interprétation des résultats}
+	
+	\begin{enumerate}
+		\item \textbf{Dimension 1} (52\%)
+		\begin{itemize}
+			\item C'est l'axe le plus important.
+			\item Il oppose les deux styles de vie : "bien-être" vs "stress/sédentarité".
+			\item C'est l'axe horizontal de tous nos graphiques.
+		\end{itemize}
+		
+		\item \textbf{Dimension 2} (21\%)
+		\begin{itemize}
+			\item C'est le deuxième axe le plus important.
+			\item Il affine les profils des individus.
+			\item C'est l'axe vertical de nos graphiques.
+		\end{itemize}
+		
+		\item \textbf{Dimensions 3, 4, 5} (< 1\%)
+		\begin{itemize}
+			\item Ces axes apportent très peu d'information.
+			\item Ils peuvent être ignorés sans perte significative.
+		\end{itemize}
+	\end{enumerate}
+	
+	\section{Utilité des valeurs propres}
+	
+	\subsection{1. Évaluer la qualité de l'analyse}
+	
+	\begin{center}
+		\fbox{
+			\begin{minipage}{0.85\textwidth}
+				\centering
+				\textbf{Bonne qualité de l'analyse}
+				\vspace{0.2cm}
+				
+				Les 2 premiers axes résument \textbf{73\%} des données.
+				\vspace{0.2cm}
+				
+				C'est un excellent résultat qui valide la fiabilité de notre analyse.
+			\end{minipage}
+		}
+	\end{center}
+	
+	\subsection{2. Choisir le nombre d'axes à garder}
+	
+	Règle pratique : on garde les dimensions dont la valeur propre est :
+	\begin{itemize}
+		\item \textbf{Supérieure à 1} (critère de Kaiser).
+		\item Ou qui cumulent environ \textbf{70-80\%} de la variance.
+	\end{itemize}
+	
+	Ici, on garde :
+	\begin{itemize}
+		\item \textbf{Dimension 1} : Valeur propre > 1
+		\item \textbf{Dimension 2} : Valeur propre > 1
+		\item Les autres : Valeur propre < 1 → On les ignore.
+	\end{itemize}
+	
+	\subsection{3. Valider les représentations graphiques}
+	
+	\begin{itemize}
+		\item Le cercle des corrélations est projeté sur les axes 1 et 2.
+		\item Ces axes expliquent 73\% de l'information.
+		\item Donc les graphiques sont \textbf{fiables} et \textbf{représentatifs}.
+	\end{itemize}
+	
+	\section{Conclusion du chapitre}
+	
+	\begin{center}
+		\fbox{
+			\begin{minipage}{0.85\textwidth}
+				\centering
+				\textbf{Points clés à retenir :}
+				\vspace{0.2cm}
+				
+				\begin{enumerate}
+					\item La Dimension 1 (52\%) oppose "bien-être" et "stress".
+					\item La Dimension 2 (21\%) affine les profils.
+					\item Les 2 axes résument 73\% de l'information → analyse fiable.
+					\item Les autres dimensions (< 1\%) sont négligeables.
+				\end{enumerate}
+			\end{minipage}
+		}
+	\end{center}
+	
+	% --- CONCLUSION GÉNÉRALE (SIMPLIFIÉE) ---
+	\chapter*{Conclusion}
+	\addcontentsline{toc}{chapter}{Conclusion}
+	\markboth{Conclusion}{Conclusion}
+	
+	\vspace{0.5cm}
+	
+	\begin{center}
+		\Large \textbf{En résumé}
+	\end{center}
+	
+	\vspace{0.3cm}
+	
+	L'ACP a permis d'identifier \textbf{deux profils} de vie :
+	
+	\vspace{0.3cm}
+	% Définition de commandes personnalisées
+	\newcommand{\ok}{\textcolor{green}{\ding{51}}}     % ✅ vert
+	\newcommand{\ko}{\textcolor{red}{\ding{55}}}        % ❌ rouge
+	\newcommand{\warning}{\textcolor{orange}{\ding{43}}} % ⚠️ orange
+	\newcommand{\info}{\textcolor{blue}{\ding{42}}} 
+	¨
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{p{5cm}p{5cm}}
+			\toprule
+			\textcolor{blue}{\textbf{Profil Sain}} & \textcolor{red}{\textbf{Profil Stressé}} \\
+			\midrule
+			\ok Beaucoup de sport & \ko Peu de sport \\
+			\ok Faible stress & \ko Stress élevé \\
+			\ok Peu d'écran & \ko Beaucoup d'écran \\
+			\ok Bonne alimentation & \ko Mauvaise alimentation \\
+			\ok Sommeil de qualité & \ko Sommeil médiocre \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\vspace{0.3cm}
+	
+	\textbf{Les principaux enseignements :}
+	
+	\begin{itemize}
+		\item Le \textcolor{red}{stress, le travail et l'écran} sont les facteurs les plus négatifs.
+		\item Le \textcolor{blue}{sport et l'alimentation} sont les clés du bien-être.
+		\item L'analyse est \textbf{très fiable} (73\% d'information résumée).
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	
+	\begin{center}
+		\fbox{
+			\begin{minipage}{0.8\textwidth}
+				\centering
+				\Large \textbf{Moins d'écran + Plus de sport = Meilleure santé}
+			\end{minipage}
+		}
+	\end{center}
+	
+	\vspace{0.5cm}
+	\begin{flushright}
+		\textit{Juillet 2026}
+	\end{flushright}
+	
+	% --- INDEX ---
+	\chapter*{Index}
+	\addcontentsline{toc}{chapter}{Index}
+	\markboth{Index}{Index}
+	
+	\begin{description}
+		\item[ACP] Analyse en Composantes Principales
+		\item[Corrélations] Relations entre les variables
+		\item[Dimension 1] Axe horizontal (52\% de variance)
+		\item[Dimension 2] Axe vertical (21\% de variance)
+		\item[Nuage de points] Représentation des individus
+		\item[Profil sain] Individus sportifs, faible stress
+		\item[Profil stressé] Individus sédentaires, stress élevé
+		\item[Valeurs propres] Importance des axes
+		\item[Variance] Information contenue dans les données
+	\end{description}
+	
+\end{document}
