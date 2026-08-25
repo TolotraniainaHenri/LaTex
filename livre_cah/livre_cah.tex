@@ -1,0 +1,555 @@
+\documentclass[11pt,a4paper,oneside]{book}
+
+% ===================== PACKAGES =====================
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{french}
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{DejaVu Sans Mono}
+\usepackage[margin=2.7cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{caption}
+\usepackage[hidelinks,colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+% ===================== MISE EN PAGE =====================
+\onehalfspacing
+\pagestyle{fancy}
+\setlength{\headheight}{14pt}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE]{\nouppercase{\leftmark}}
+\fancyhead[LO]{\nouppercase{\rightmark}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\huge}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{30pt}
+
+% ===================== CODE R (listings) =====================
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codekw}{RGB}{0,90,180}
+\definecolor{codecomment}{RGB}{100,100,100}
+\definecolor{codestring}{RGB}{160,30,30}
+
+\lstdefinelanguage{Rlang}{
+  morekeywords={function, if, else, for, while, repeat, return, TRUE, FALSE, NULL, library, print, cat},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]",
+}
+
+\lstset{
+  language=Rlang,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekw}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  breakatwhitespace=false,
+  showstringspaces=false,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=8pt,
+  framexleftmargin=6pt,
+}
+
+% ===================== INFOS DOCUMENT =====================
+\title{Classification Hiérarchique Ascendante et Consolidation par la Méthode des Centres Mobiles sur R}
+\author{RABESIHARISON Tolotraniaina Henri}
+\date{10 Août 2026}
+
+\begin{document}
+
+% ===================== PAGE DE GARDE =====================
+\begin{titlepage}
+\centering
+\vspace*{0.5cm}
+{\large\bfseries Université d'Antananarivo}\\[0.3cm]
+{\large Faculté des Sciences}\\[0.3cm]
+{\large Mention Informatique et Technologie (MIT)}\\[0.2cm]
+{\large Grade~: Master 1}\\[0.2cm]
+{\large Parcours~: Innovation et Technologie (INT)}\\[2cm]
+
+\rule{\linewidth}{0.5pt}\\[0.6cm]
+{\Huge\bfseries CLASSIFICATION HIÉRARCHIQUE ASCENDANTE\\[0.3cm] ET CONSOLIDATION PAR LA MÉTHODE\\[0.3cm] DES CENTRES MOBILES SUR R\\[0.5cm]}
+{\Large \'Etude des Habitudes de Vie Quotidienne}\\[0.6cm]
+\rule{\linewidth}{0.5pt}\\[2.5cm]
+
+{\large \textbf{Nom~:} RABESIHARISON Tolotraniaina Henri}\\[2cm]
+
+\vfill
+{\large 10 Août 2026}\\[0.3cm]
+{\large\bfseries Année universitaire~: 2025 -- 2026}
+\end{titlepage}
+
+\frontmatter
+\tableofcontents
+\listoffigures
+\listoftables
+
+\chapter*{Avant-propos}
+\addcontentsline{toc}{chapter}{Avant-propos}
+Cet ouvrage s'inscrit dans le cadre des travaux de recherche menés en Master~1, parcours Innovation et Technologie, à la Mention Informatique et Technologie de la Faculté des Sciences de l'Université d'Antananarivo. Il propose une étude méthodologique et appliquée de deux techniques complémentaires de classification automatique~: la Classification Hiérarchique Ascendante (CAH) et la méthode des centres mobiles, mises en \oe uvre conjointement --- selon la démarche dite de \emph{consolidation} --- à l'aide du logiciel statistique R. L'application est conduite sur un jeu de données relatif aux habitudes de vie quotidienne d'un ensemble d'individus, dans le but d'illustrer concrètement l'intérêt de cette approche hybride pour la construction de typologies robustes et interprétables.
+
+\mainmatter
+
+% =====================================================================
+\chapter{Introduction générale}
+% =====================================================================
+
+L'analyse des données multivariées occupe une place centrale dans les sciences appliquées, qu'il s'agisse de marketing, de sociologie, d'épidémiologie ou de santé publique. Parmi les outils les plus employés figure la \textbf{classification automatique} (ou \emph{clustering}), dont l'objectif est de regrouper un ensemble d'individus en classes homogènes, de telle sorte que les individus d'une même classe se ressemblent le plus possible, tandis que les individus de classes différentes se distinguent nettement.
+
+Deux grandes familles de méthodes de classification automatique sont traditionnellement opposées~: les méthodes \textbf{hiérarchiques}, qui construisent une arborescence de partitions emboîtées (dendrogramme), et les méthodes de \textbf{partitionnement direct} (ou méthodes de réallocation dynamique), au premier rang desquelles figure la méthode des centres mobiles (\emph{k-means}). Chacune de ces approches présente des avantages et des limites~: la CAH offre une vision globale de la structure des données et ne nécessite pas de fixer \emph{a priori} le nombre de classes, mais elle est coûteuse en temps de calcul et irréversible (une fusion effectuée ne peut être défaite) ; la méthode des centres mobiles, à l'inverse, est rapide et peu coûteuse, mais elle exige de fixer le nombre de classes à l'avance et sa solution dépend fortement du choix des centres initiaux.
+
+C'est précisément pour dépasser ces limites que la littérature statistique francophone (Lebart, Morineau et Piron, notamment) préconise une démarche \textbf{mixte}, consistant à réaliser d'abord une CAH afin de déterminer un nombre de classes pertinent et une partition initiale de bonne qualité, puis à \textbf{consolider} cette partition par une méthode des centres mobiles. Cette seconde étape permet de corriger les éventuelles erreurs de classement dues au caractère irréversible des agrégations hiérarchiques, en autorisant les individus à migrer d'une classe à l'autre jusqu'à stabilisation de l'inertie intra-classe.
+
+\section*{Problématique}
+\addcontentsline{toc}{section}{Problématique}
+Comment combiner les atouts respectifs de la Classification Hiérarchique Ascendante et de la méthode des centres mobiles afin d'obtenir une typologie à la fois interprétable, stable et statistiquement satisfaisante~? Cette question sera examinée à travers un cas d'application portant sur les habitudes de vie quotidienne d'un échantillon de 50 individus, décrits par six variables quantitatives (durée de sommeil, activité physique, temps d'écran, qualité de l'alimentation, hydratation et niveau de stress perçu).
+
+\section*{Objectifs de l'étude}
+\addcontentsline{toc}{section}{Objectifs de l'étude}
+\begin{itemize}
+  \item Présenter le cadre théorique de la CAH et de la méthode des centres mobiles ;
+  \item Justifier l'intérêt de la démarche de consolidation ;
+  \item Mettre en \oe uvre l'ensemble de la démarche sous R, de l'importation des données à la représentation graphique des résultats ;
+  \item Interpréter les classes obtenues en dégageant des profils-types d'individus.
+\end{itemize}
+
+\section*{Plan de l'ouvrage}
+\addcontentsline{toc}{section}{Plan de l'ouvrage}
+Le chapitre~2 expose le cadre théorique de la classification automatique. Le chapitre~3 décrit le jeu de données et la démarche méthodologique retenue. Le chapitre~4 détaille la mise en \oe uvre sous R, code à l'appui. Le chapitre~5 présente et interprète les résultats obtenus. Le chapitre~6 conclut l'ouvrage et en dégage les limites et perspectives.
+
+% =====================================================================
+\chapter{Cadre théorique}
+% =====================================================================
+
+\section{Généralités sur la classification automatique}
+
+Soit un ensemble de $n$ individus décrits par $p$ variables quantitatives, formant un tableau de données $X$ de dimension $n \times p$. L'objectif de la classification automatique est de partitionner ces $n$ individus en $k$ classes $C_1, \dots, C_k$ de sorte à maximiser l'homogénéité intra-classe et l'hétérogénéité inter-classe.
+
+Cette notion se formalise à l'aide de la décomposition de l'inertie totale $I_T$ du nuage de points, qui se décompose en une inertie intra-classe $I_W$ (\emph{within}) et une inertie inter-classe $I_B$ (\emph{between})~:
+\begin{equation}
+I_T = I_W + I_B, \qquad \text{avec} \quad I_W = \sum_{c=1}^{k}\sum_{i \in C_c} d^2(x_i, g_c), \quad I_B = \sum_{c=1}^{k} n_c\, d^2(g_c, g)
+\end{equation}
+où $g_c$ désigne le centre de gravité de la classe $C_c$, $g$ le centre de gravité global du nuage, $n_c$ l'effectif de la classe $c$, et $d(\cdot,\cdot)$ la distance euclidienne. Une bonne partition est celle qui minimise $I_W$ (ou, de façon équivalente, maximise $I_B$, la somme $I_T$ étant fixe). Le rapport $R^2 = I_B / I_T$ mesure la part de l'inertie totale expliquée par la partition~: plus $R^2$ est proche de 1, meilleure est la partition.
+
+Les variables étant en général exprimées dans des unités différentes (heures, minutes, litres, scores...), il est indispensable de procéder à un \textbf{centrage-réduction} préalable (chaque variable est centrée sur sa moyenne et divisée par son écart-type), afin qu'aucune variable ne domine artificiellement le calcul des distances du seul fait de son échelle.
+
+\section{La Classification Hiérarchique Ascendante (CAH)}
+
+\subsection{Principe}
+La CAH est une méthode agglomérative~: elle part d'une partition initiale où chaque individu constitue sa propre classe ($n$ classes), puis fusionne itérativement les deux classes les plus proches, jusqu'à n'obtenir plus qu'une seule classe regroupant l'ensemble des individus. Le résultat est représenté sous la forme d'un arbre appelé \textbf{dendrogramme}, dont la hauteur de chaque fusion traduit la dissimilarité entre les classes regroupées.
+
+\subsection{Critère d'agrégation de Ward}
+Plusieurs critères d'agrégation existent (saut minimum, saut maximum, moyenne). Le \textbf{critère de Ward}, retenu dans cette étude, agrège à chaque étape les deux classes dont la fusion entraîne la plus faible augmentation de l'inertie intra-classe totale. Il présente l'avantage de produire des classes relativement homogènes et de taille équilibrée, et reste le critère le plus utilisé en pratique.
+
+\subsection{Choix du nombre de classes}
+Le nombre de classes $k$ à retenir n'est pas fixé \emph{a priori}~: il se lit sur le dendrogramme, ou plus rigoureusement sur le \textbf{graphique des sauts d'inertie}, qui représente la perte d'inertie occasionnée par chaque fusion en fonction du nombre de classes. Un saut particulièrement marqué (une hauteur de fusion nettement supérieure aux précédentes) indique le niveau de coupe optimal du dendrogramme.
+
+\subsection{Limites de la CAH}
+La CAH présente deux limites principales~: (i) son caractère \emph{irréversible} --- un individu mal classé lors d'une fusion précoce ne peut plus changer de classe par la suite --- et (ii) son coût de calcul, en $O(n^2 \log n)$ ou plus selon le critère, qui la rend peu adaptée aux très grands effectifs.
+
+\section{La méthode des centres mobiles}
+
+\subsection{Principe}
+La méthode des centres mobiles (\emph{k-means}, ou méthode de réallocation dynamique) part d'un nombre de classes $k$ fixé et de $k$ centres initiaux (choisis aléatoirement ou fournis par l'utilisateur). L'algorithme, dû à Forgy et Lloyd, alterne ensuite deux étapes jusqu'à convergence~:
+\begin{enumerate}
+  \item \textbf{Affectation}~: chaque individu est affecté à la classe dont le centre est le plus proche (au sens de la distance euclidienne) ;
+  \item \textbf{Recalcul}~: les centres sont recalculés comme les barycentres des individus nouvellement affectés à chaque classe.
+\end{enumerate}
+L'algorithme converge lorsque les affectations n'évoluent plus, ou après un nombre maximal d'itérations. Il garantit une décroissance monotone de l'inertie intra-classe à chaque itération.
+
+\subsection{Limites}
+La qualité de la solution obtenue dépend fortement du choix des centres initiaux~: une mauvaise initialisation peut conduire à un optimum local médiocre. Par ailleurs, le nombre de classes $k$ doit être fixé \emph{a priori}, ce que la méthode ne permet pas de déterminer par elle-même.
+
+\section{La consolidation d'une CAH par centres mobiles}
+
+L'idée de la \textbf{consolidation} --- ou classification mixte --- consiste à faire coopérer les deux méthodes précédentes de façon à cumuler leurs avantages respectifs tout en neutralisant leurs limites~:
+
+\begin{enumerate}
+  \item Réaliser une CAH (critère de Ward) sur l'ensemble des individus ;
+  \item Déterminer le nombre de classes $k$ pertinent à l'aide du dendrogramme et du graphique des sauts d'inertie ;
+  \item Calculer les centres de gravité des $k$ classes obtenues par coupe du dendrogramme ;
+  \item Utiliser ces centres comme \textbf{centres initiaux} d'un algorithme des centres mobiles, appliqué à l'ensemble des individus.
+\end{enumerate}
+
+Cette procédure présente un double intérêt~: le nombre de classes et la partition de départ ne sont plus choisis arbitrairement mais déduits de la structure hiérarchique des données (résolvant la principale faiblesse des centres mobiles), tandis que la phase de réallocation dynamique permet de \emph{corriger} les éventuelles erreurs de classement commises lors des premières fusions de la CAH, celles-ci étant irréversibles (résolvant ainsi la principale faiblesse de la CAH). On s'attend, à l'issue de la consolidation, à une diminution de l'inertie intra-classe et donc à une amélioration du $R^2$ de la partition, au prix d'un nombre généralement faible de réaffectations d'individus.
+
+% =====================================================================
+\chapter{Données et méthodologie}
+% =====================================================================
+
+\section{Présentation du jeu de données}
+
+L'étude porte sur un échantillon de $n = 50$ individus, décrits par $p = 6$ variables quantitatives relatives à leurs habitudes de vie quotidienne~:
+
+\begin{table}[h!]
+\centering
+\caption{Variables du jeu de données}
+\label{tab:variables}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Variable} & \textbf{Description} \\
+\midrule
+Sommeil & Durée moyenne de sommeil (heures/nuit) \\
+ActivitePhysique & Activité physique hebdomadaire (minutes/semaine) \\
+TempsEcran & Temps d'exposition aux écrans (heures/jour) \\
+AlimentationSaine & Score de qualité de l'alimentation (0 à 10) \\
+Hydratation & Consommation d'eau (litres/jour) \\
+Stress & Niveau de stress perçu (score de 0 à 10) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Un extrait des douze premiers individus est présenté au tableau~\ref{tab:extrait}. L'intégralité du jeu de données figure en annexe~A.
+
+\begin{table}[h!]
+\centering
+\small
+\caption{Extrait du jeu de données (12 premiers individus)}
+\label{tab:extrait}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+\textbf{Individu} & \textbf{Sommeil} & \textbf{Act. Phys.} & \textbf{Ecran} & \textbf{Alim. saine} & \textbf{Hydrat.} & \textbf{Stress} \\
+\midrule
+I1  & 5.98 & 62.06  & 5.48 & 3.86 & 2.02 & 7.49 \\
+I2  & 7.53 & 256.45 & 1.12 & 8.75 & 2.67 & 4.07 \\
+I3  & 7.48 & 255.89 & 2.40 & 8.78 & 2.11 & 1.88 \\
+I4  & 7.98 & 324.99 & 2.12 & 7.97 & 1.60 & 3.43 \\
+I5  & 6.74 & 319.39 & 2.49 & 8.35 & 2.47 & 3.05 \\
+I6  & 7.85 & 279.14 & 2.43 & 8.82 & 2.19 & 3.29 \\
+I7  & 4.96 & 23.07  & 6.09 & 3.87 & 1.18 & 8.15 \\
+I8  & 6.64 & 403.35 & 1.24 & 8.80 & 2.05 & 2.48 \\
+I9  & 7.37 & 292.97 & 2.02 & 8.67 & 2.64 & 1.93 \\
+I10 & 7.48 & 323.04 & 2.74 & 8.33 & 2.23 & 2.85 \\
+I11 & 6.66 & 245.76 & 3.32 & 7.61 & 2.18 & 5.73 \\
+I12 & 6.78 & 133.94 & 4.48 & 5.30 & 1.90 & 5.28 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Nécessité de la standardisation}
+Les six variables sont exprimées dans des unités très différentes (heures, minutes, litres, scores). Sans standardisation préalable, la variable \emph{ActivitePhysique} (dont les valeurs s'échelonnent de quelques minutes à plus de 400 minutes) écraserait à elle seule le calcul des distances euclidiennes. Toutes les analyses sont donc conduites sur les données centrées-réduites.
+
+\section{Démarche méthodologique retenue}
+La démarche adoptée suit exactement le schéma de consolidation présenté au chapitre~2~:
+\begin{enumerate}
+  \item Centrage-réduction des six variables ;
+  \item CAH sur les données centrées-réduites, critère de Ward, distance euclidienne ;
+  \item Lecture du dendrogramme et du graphique des sauts d'inertie pour fixer $k$ ;
+  \item Calcul des centres de gravité des $k$ classes de la CAH ;
+  \item Consolidation par la méthode des centres mobiles, initialisée sur ces centres ;
+  \item Analyse des profils moyens des classes finales et projection sur le premier plan factoriel d'une Analyse en Composantes Principales (ACP), utilisée ici uniquement à des fins de \emph{visualisation} des classes.
+\end{enumerate}
+
+% =====================================================================
+\chapter{Mise en \oe uvre sous R}
+% =====================================================================
+
+Cette section détaille, étape par étape, le script R permettant de reproduire l'ensemble de l'analyse.
+
+\section{Importation et préparation des données}
+
+\begin{lstlisting}[caption={Importation et centrage-réduction des données}]
+# Importation des donnees
+donnees <- read.csv("habitudes.csv", stringsAsFactors = FALSE)
+
+# Selection des variables quantitatives actives
+vars <- c("Sommeil", "ActivitePhysique", "TempsEcran",
+          "AlimentationSaine", "Hydratation", "Stress")
+X <- donnees[, vars]
+rownames(X) <- donnees$Individu
+
+# Centrage-reduction (indispensable : unites heterogenes)
+Xcr <- scale(X)
+\end{lstlisting}
+
+\section{Classification Hiérarchique Ascendante (critère de Ward)}
+
+\begin{lstlisting}[caption={CAH sur les données centrées-réduites}]
+# Matrice des distances euclidiennes
+d <- dist(Xcr, method = "euclidean")
+
+# CAH - critere de Ward
+cah <- hclust(d, method = "ward.D2")
+
+# Dendrogramme
+plot(cah, labels = rownames(Xcr), cex = 0.6, hang = -1,
+     main = "Dendrogramme - CAH (methode de Ward)",
+     xlab = "Individus", ylab = "Distance (Ward)")
+rect.hclust(cah, k = 3, border = c("orange","forestgreen","red"))
+\end{lstlisting}
+
+La figure~\ref{fig:dendro} présente le dendrogramme obtenu. Trois blocs bien séparés apparaissent nettement, matérialisés par la ligne de coupe.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.95\textwidth]{figs/dendrogramme.png}
+\caption{Dendrogramme de la CAH (critère de Ward) et coupe en 3 classes}
+\label{fig:dendro}
+\end{figure}
+
+\section{Choix du nombre de classes}
+
+\begin{lstlisting}[caption={Graphique des sauts d'inertie}]
+# Hauteurs des 10 dernieres agregations
+inertie <- rev(cah$height)[1:10]
+plot(1:10, inertie, type = "b", pch = 19,
+     xlab = "Nombre de classes", ylab = "Distance d'agregation (Ward)",
+     main = "Graphique des sauts d'inertie")
+\end{lstlisting}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.75\textwidth]{figs/sauts_inertie.png}
+\caption{Graphique des sauts d'inertie}
+\label{fig:sauts}
+\end{figure}
+
+Comme le montre la figure~\ref{fig:sauts}, le saut le plus marqué se situe au passage de 3 à 2 classes (la distance d'agrégation passe de 10.04 à 18.67, soit une augmentation de près de 86\,\%), tandis que le passage de 4 à 3 classes n'entraîne qu'une faible augmentation (de 4.55 à 10.04). Le nombre de classes retenu est donc $k = 3$.
+
+\section{Consolidation par la méthode des centres mobiles}
+
+\begin{lstlisting}[caption={Consolidation de la CAH par k-means}]
+# Partition initiale issue de la coupe du dendrogramme en 3 classes
+classe_cah <- cutree(cah, k = 3)
+
+# Centres de gravite des 3 classes (dans l'espace centre-reduit)
+centres_init <- aggregate(Xcr, by = list(classe_cah), FUN = mean)[, -1]
+
+# Consolidation : k-means initialise sur les centres de la CAH
+km <- kmeans(Xcr, centers = as.matrix(centres_init), iter.max = 50)
+classe_finale <- km$cluster
+
+# Tableau croise : stabilite de la consolidation
+table(CAH = classe_cah, Consolidation = classe_finale)
+
+# Inertie intra-classe avant / apres consolidation
+inertie_intra <- function(X, classe) {
+  sum(sapply(unique(classe), function(c)
+    sum(scale(X[classe == c, ], scale = FALSE)^2)))
+}
+inertie_totale   <- sum(scale(Xcr, scale = FALSE)^2)
+inertie_avant    <- inertie_intra(Xcr, classe_cah)
+inertie_apres    <- inertie_intra(Xcr, classe_finale)
+cat("R2 avant consolidation :", round(100*(1 - inertie_avant/inertie_totale), 1), "%\n")
+cat("R2 apres consolidation :", round(100*(1 - inertie_apres/inertie_totale), 1), "%\n")
+\end{lstlisting}
+
+\subsection*{Résultats numériques obtenus}
+Le tableau croisé entre la partition de la CAH et la partition consolidée est reporté ci-dessous~:
+
+\begin{table}[h!]
+\centering
+\caption{Tableau croisé CAH $\times$ Consolidation}
+\label{tab:croise}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & \textbf{Classe finale 1} & \textbf{Classe finale 2} & \textbf{Classe finale 3} \\
+\midrule
+Classe CAH 1 & 18 & 2 & 0 \\
+Classe CAH 2 & 0  & 14 & 0 \\
+Classe CAH 3 & 0  & 0  & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Seuls \textbf{2 individus sur 50 (4\,\%)} ont changé de classe lors de la consolidation, ce qui traduit une partition initiale de la CAH déjà très stable. L'inertie intra-classe passe néanmoins de 75.23 à 71.55 (sur une inertie totale de 300), ce qui porte le $R^2$ de la partition de \textbf{74.9\,\% à 76.2\,\%}~: la consolidation améliore donc légèrement l'homogénéité des classes, en réaffectant les individus ambigus vers le groupe qui leur correspond le mieux.
+
+% =====================================================================
+\chapter{Résultats et interprétation}
+% =====================================================================
+
+\section{Profils moyens des classes}
+
+Le tableau~\ref{tab:profils} présente, pour chacune des trois classes finales, l'effectif ainsi que la moyenne de chaque variable (exprimée dans son unité d'origine, non centrée-réduite).
+
+\begin{table}[h!]
+\centering
+\caption{Profils moyens des trois classes finales}
+\label{tab:profils}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+\textbf{Classe} & \textbf{Effectif} & \textbf{Sommeil} & \textbf{Act.Phys.} & \textbf{Ecran} & \textbf{Alim.saine} & \textbf{Hydrat.} & \textbf{Stress} \\
+\midrule
+G1 & 18 & 7.57 & 308.10 & 2.11 & 8.25 & 2.18 & 3.09 \\
+G2 & 16 & 7.07 & 161.87 & 4.11 & 6.12 & 1.71 & 5.12 \\
+G3 & 16 & 5.85 & 55.98  & 6.75 & 4.79 & 1.30 & 7.03 \\
+\midrule
+\textit{Moyenne globale} & 50 & 6.87 & 178.24 & 4.19 & 6.47 & 1.75 & 5.02 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La figure~\ref{fig:boxplots} illustre, variable par variable, la dispersion des observations au sein de chaque classe, confirmant une séparation nette des trois groupes sur l'ensemble des six variables.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.95\textwidth]{figs/boxplots_classes.png}
+\caption{Distribution de chaque variable selon la classe finale}
+\label{fig:boxplots}
+\end{figure}
+
+\section{Visualisation dans le plan factoriel}
+
+Afin de visualiser la séparation des classes dans le plan, une Analyse en Composantes Principales a été réalisée à titre illustratif sur les mêmes données centrées-réduites. Les deux premiers axes factoriels résument à eux seuls \textbf{86.1\,\%} de l'inertie totale (79.0\,\% pour l'axe~1 et 7.1\,\% pour l'axe~2), ce qui autorise une lecture fiable du nuage de points sur ce seul plan.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{figs/plan_factoriel_classes.png}
+\caption{Projection des individus et des classes dans le premier plan factoriel}
+\label{fig:planfactoriel}
+\end{figure}
+
+La figure~\ref{fig:planfactoriel} confirme visuellement les résultats de la classification~: les trois classes forment des nuages parfaitement disjoints le long du premier axe factoriel, qui apparaît ainsi comme un «~axe de mode de vie~» opposant les individus actifs et bien reposés (à droite) aux individus sédentaires et stressés (à gauche), la classe G2 occupant une position intermédiaire.
+
+\section{Interprétation des classes}
+
+\subsection*{Classe G1 --- «~Actifs équilibrés~» (18 individus, 36\,\%)}
+Ce groupe se caractérise par la durée de sommeil la plus élevée (7.57~h en moyenne), un très haut niveau d'activité physique (plus de 5~heures par semaine), un temps d'écran limité (2.1~h/jour), la meilleure alimentation (score de 8.25/10) et le niveau de stress le plus faible (3.09/10). Il s'agit d'individus adoptant un mode de vie globalement sain et équilibré.
+
+\subsection*{Classe G2 --- «~Modérés~» (16 individus, 32\,\%)}
+Ce groupe présente un profil intermédiaire sur l'ensemble des variables~: sommeil correct (7.07~h), activité physique modérée (environ 2h40 par semaine), temps d'écran et niveau de stress moyens. Ces individus n'affichent pas de déséquilibre marqué mais ne se distinguent pas non plus par des habitudes particulièrement favorables.
+
+\subsection*{Classe G3 --- «~Sédentaires~» (16 individus, 32\,\%)}
+Ce groupe se distingue par un déficit de sommeil (5.85~h en moyenne, en-deçà des recommandations usuelles), une activité physique très faible (moins d'une heure par semaine), le temps d'écran le plus élevé (6.75~h/jour), la moins bonne alimentation (4.79/10) et le niveau de stress le plus important (7.03/10). Ce profil cumule plusieurs facteurs de risque pour la santé et le bien-être.
+
+\section{Discussion et limites}
+L'analyse conduite met en évidence trois profils d'individus nettement contrastés et cohérents sur le plan comportemental, ce qui valide \emph{a posteriori} la pertinence du choix de $k = 3$ classes. La très faible proportion d'individus reclassés lors de la consolidation (4\,\%) témoigne de la qualité de la partition initiale issue de la CAH, tout en illustrant l'utilité de l'étape de consolidation pour affiner marginalement l'homogénéité des classes.
+
+Il convient cependant de souligner certaines limites~: le jeu de données utilisé, de taille modeste ($n=50$), a été constitué à des fins pédagogiques et illustratives ; une application sur des données d'enquête réelles, à plus grande échelle, permettrait de confirmer la généralisabilité des profils dégagés. Par ailleurs, seules des variables quantitatives ont été mobilisées~: l'intégration de variables qualitatives (catégorie socioprofessionnelle, sexe, âge) pourrait enrichir la typologie au moyen de méthodes de classification mixte adaptées aux données de nature hétérogène.
+
+% =====================================================================
+\chapter{Conclusion générale}
+% =====================================================================
+
+Cet ouvrage a présenté, sur le plan théorique puis appliqué, la démarche de consolidation d'une Classification Hiérarchique Ascendante par la méthode des centres mobiles. L'application menée sur des données relatives aux habitudes de vie quotidienne de 50 individus a permis de dégager trois profils comportementaux nettement différenciés --- \emph{Actifs équilibrés}, \emph{Modérés} et \emph{Sédentaires} --- et d'illustrer concrètement, chiffres à l'appui, l'apport de la consolidation~: un léger gain d'homogénéité des classes ($R^2$ passant de 74.9\,\% à 76.2\,\%), obtenu au prix d'un nombre très limité de réaffectations d'individus (4\,\%).
+
+Au-delà du cas d'application traité, cette étude confirme l'intérêt méthodologique d'articuler les approches hiérarchique et non hiérarchique de la classification automatique~: la CAH offre un cadre exploratoire rassurant pour déterminer le nombre de classes et une partition de départ de bonne qualité, tandis que la méthode des centres mobiles permet d'en optimiser localement l'homogénéité. Cette complémentarité, aujourd'hui bien établie dans la pratique statistique, mériterait d'être davantage exploitée dans les études de comportements et de modes de vie, notamment dans une perspective de santé publique où l'identification de profils à risque --- tels que le groupe «~Sédentaires~» mis en évidence ici --- peut utilement orienter des actions de prévention ciblées.
+
+% =====================================================================
+\backmatter
+\chapter*{Bibliographie}
+\addcontentsline{toc}{chapter}{Bibliographie}
+\begin{itemize}
+  \item Lebart, L., Morineau, A., Piron, M. (2006). \emph{Statistique exploratoire multidimensionnelle}. Dunod, Paris.
+  \item Ward, J.~H. (1963). «~Hierarchical Grouping to Optimize an Objective Function~». \emph{Journal of the American Statistical Association}, 58(301), 236--244.
+  \item MacQueen, J. (1967). «~Some methods for classification and analysis of multivariate observations~». \emph{Proceedings of the 5th Berkeley Symposium on Mathematical Statistics and Probability}, 1, 281--297.
+  \item Husson, F., Lê, S., Pagès, J. (2016). \emph{Analyse de données avec R}. Presses Universitaires de Rennes.
+  \item Saporta, G. (2011). \emph{Probabilités, analyse des données et statistique}. Éditions Technip, Paris.
+\end{itemize}
+
+\appendix
+\chapter{Extrait complet du jeu de données}
+
+Le tableau~\ref{tab:annexeA} présente les 25 premiers individus du jeu de données, avec leur classe finale d'appartenance (issue de la consolidation). L'ensemble des 50 individus est disponible dans le fichier \texttt{habitudes.csv} accompagnant cet ouvrage.
+
+\begin{longtable}{@{}lrrrrrrc@{}}
+\caption{Extrait du jeu de données (25 premiers individus)}\label{tab:annexeA}\\
+\toprule
+\textbf{Individu} & \textbf{Sommeil} & \textbf{Act.Phys.} & \textbf{Ecran} & \textbf{Alim.saine} & \textbf{Hydrat.} & \textbf{Stress} & \textbf{Classe} \\
+\midrule
+\endfirsthead
+\multicolumn{8}{c}{\tablename\ \thetable{} -- suite}\\
+\toprule
+\textbf{Individu} & \textbf{Sommeil} & \textbf{Act.Phys.} & \textbf{Ecran} & \textbf{Alim.saine} & \textbf{Hydrat.} & \textbf{Stress} & \textbf{Classe} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+I1  & 5.98 & 62.06  & 5.48 & 3.86 & 2.02 & 7.49 & 3 \\
+I2  & 7.53 & 256.45 & 1.12 & 8.75 & 2.67 & 4.07 & 1 \\
+I3  & 7.48 & 255.89 & 2.40 & 8.78 & 2.11 & 1.88 & 1 \\
+I4  & 7.98 & 324.99 & 2.12 & 7.97 & 1.60 & 3.43 & 1 \\
+I5  & 6.74 & 319.39 & 2.49 & 8.35 & 2.47 & 3.05 & 1 \\
+I6  & 7.85 & 279.14 & 2.43 & 8.82 & 2.19 & 3.29 & 1 \\
+I7  & 4.96 & 23.07  & 6.09 & 3.87 & 1.18 & 8.15 & 3 \\
+I8  & 6.64 & 403.35 & 1.24 & 8.80 & 2.05 & 2.48 & 1 \\
+I9  & 7.37 & 292.97 & 2.02 & 8.67 & 2.64 & 1.93 & 1 \\
+I10 & 7.48 & 323.04 & 2.74 & 8.33 & 2.23 & 2.85 & 1 \\
+I11 & 6.66 & 245.76 & 3.32 & 7.61 & 2.18 & 5.73 & 2 \\
+I12 & 6.78 & 133.94 & 4.48 & 5.30 & 1.90 & 5.28 & 2 \\
+I13 & 6.92 & 200.15 & 4.87 & 6.44 & 1.63 & 4.61 & 2 \\
+I14 & 6.02 & 47.88  & 5.71 & 4.10 & 1.09 & 6.98 & 3 \\
+I15 & 7.72 & 289.02 & 2.55 & 8.09 & 2.34 & 3.62 & 1 \\
+I16 & 7.11 & 175.30 & 3.98 & 6.27 & 1.85 & 5.02 & 2 \\
+I17 & 6.95 & 155.62 & 4.35 & 5.98 & 1.66 & 5.44 & 2 \\
+I18 & 5.63 & 41.20  & 7.02 & 4.55 & 1.21 & 6.87 & 3 \\
+I19 & 7.20 & 168.77 & 3.76 & 6.60 & 1.79 & 4.85 & 2 \\
+I20 & 7.64 & 296.48 & 2.28 & 8.41 & 2.09 & 3.18 & 1 \\
+I21 & 5.79 & 58.13  & 6.90 & 4.62 & 1.35 & 7.20 & 3 \\
+I22 & 6.10 & 63.44  & 6.55 & 4.91 & 1.28 & 6.75 & 3 \\
+I23 & 7.03 & 145.29 & 4.20 & 6.05 & 1.72 & 5.15 & 2 \\
+I24 & 5.71 & 52.90  & 6.71 & 4.38 & 1.19 & 7.35 & 3 \\
+I25 & 6.15 & 66.02  & 6.30 & 5.02 & 1.32 & 6.60 & 3 \\
+\end{longtable}
+
+\chapter{Script R complet}
+
+\begin{lstlisting}[caption={Script R complet de l'étude}]
+# =====================================================================
+# Etude des habitudes de vie quotidienne
+# CAH (Ward) + consolidation par la methode des centres mobiles
+# =====================================================================
+
+# ---- 1. Importation et preparation ----
+donnees <- read.csv("habitudes.csv", stringsAsFactors = FALSE)
+vars <- c("Sommeil", "ActivitePhysique", "TempsEcran",
+          "AlimentationSaine", "Hydratation", "Stress")
+X <- donnees[, vars]
+rownames(X) <- donnees$Individu
+Xcr <- scale(X)
+
+# ---- 2. Classification Hierarchique Ascendante ----
+d   <- dist(Xcr, method = "euclidean")
+cah <- hclust(d, method = "ward.D2")
+
+plot(cah, labels = rownames(Xcr), cex = 0.6, hang = -1,
+     main = "Dendrogramme - CAH (methode de Ward)")
+rect.hclust(cah, k = 3, border = c("orange","forestgreen","red"))
+
+# ---- 3. Choix du nombre de classes ----
+inertie <- rev(cah$height)[1:10]
+plot(1:10, inertie, type = "b", pch = 19,
+     xlab = "Nombre de classes", ylab = "Distance d'agregation")
+
+# ---- 4. Consolidation par centres mobiles ----
+classe_cah    <- cutree(cah, k = 3)
+centres_init  <- aggregate(Xcr, by = list(classe_cah), FUN = mean)[, -1]
+km            <- kmeans(Xcr, centers = as.matrix(centres_init), iter.max = 50)
+classe_finale <- km$cluster
+
+table(CAH = classe_cah, Consolidation = classe_finale)
+
+# ---- 5. Profils des classes ----
+profils <- aggregate(X, by = list(Classe = classe_finale), FUN = mean)
+print(profils)
+
+# ---- 6. Visualisation (ACP) ----
+acp <- prcomp(Xcr)
+plot(acp$x[,1:2], col = classe_finale, pch = 19,
+     xlab = "Axe 1", ylab = "Axe 2",
+     main = "Projection des classes dans le plan factoriel")
+points(predict(acp, newdata = km$centers), pch = 4, cex = 2, lwd = 3)
+legend("topright", legend = paste("Classe", 1:3), col = 1:3, pch = 19)
+\end{lstlisting}
+
+\end{document}
