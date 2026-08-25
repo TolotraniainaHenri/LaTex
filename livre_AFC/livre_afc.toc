@@ -1,0 +1,51 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{Table des matières}{i}{Doc-Start}%
+\contentsline {chapter}{Préface}{1}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Introduction}{2}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Contexte de l'étude}{2}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Présentation des données}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Objectifs de l'étude}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Structure du rapport}{2}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Méthodologie}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}L'Analyse Factorielle des Correspondances (AFC)}{4}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Principe de l'AFC}{4}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Étapes de l'AFC}{4}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Description des variables}{4}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Justification de l'AFC pour cette étude}{5}{section.2.3}%
+\contentsline {chapter}{\numberline {3}Carte Factorielle des Loisirs}{6}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Présentation du graphique}{6}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Interprétation des axes}{6}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Axe horizontal (Dimension 1 - 48.9\%)}{6}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Axe vertical (Dimension 2 - 30.9\%)}{7}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.3}Regroupement des loisirs}{7}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Conclusion du chapitre}{7}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Carte Factorielle des Professions}{8}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Présentation du graphique}{8}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Légende du graphique}{8}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Identification des profils types}{8}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Profil 1 : Les intellectuels (Cadres, Retraités)}{8}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Profil 2 : Les actifs populaires (Ouvriers, Employés)}{9}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Profil 3 : Les manuels (Agriculteurs)}{9}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}Profil 4 : Les jeunes (Étudiants, Chômeurs)}{9}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}Analyse des positions relatives}{9}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Conclusion du chapitre}{10}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Biplot Conjoint - Relations Professions-Loisirs}{11}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Présentation du graphique}{11}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Interprétation des associations}{12}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Associations fortes}{12}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Oppositions principales}{12}{subsection.5.2.2}%
+\contentsline {section}{\numberline {5.3}Interprétation des positions relatives}{12}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Conclusion du chapitre}{12}{section.5.4}%
+\contentsline {chapter}{\numberline {6}Valeurs Propres - Qualité de l'Analyse}{14}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Présentation des résultats}{14}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Définition des valeurs propres}{14}{subsection.6.1.1}%
+\contentsline {section}{\numberline {6.2}Résultats de l'analyse}{14}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Pourcentages d'inertie expliquée}{14}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Représentation graphique textuelle}{14}{subsection.6.2.2}%
+\contentsline {subsubsection}{Barres d'inertie}{14}{subsubsection*.12}%
+\contentsline {subsubsection}{Visualisation cumulative}{15}{subsubsection*.13}%
+\contentsline {section}{\numberline {6.3}Interprétation des résultats}{15}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Analyse détaillée}{15}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Qualité globale de l'analyse}{15}{subsection.6.3.2}%
+\contentsline {section}{\numberline {6.4}Conclusion du chapitre}{16}{section.6.4}%
+\contentsline {chapter}{Conclusion générale}{17}{chapter*.14}%

@@ -1,0 +1,528 @@
+\documentclass[12pt,a4paper]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Configuration de la page
+\geometry{a4paper, margin=2.5cm}
+\setstretch{1.15}
+
+% Configuration des hyperliens
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue,
+	pdfauthor={RABESIHARISON Tolotraniaina Henri},
+	pdftitle={Classification Hierarchique Ascendante et Methode des Centres Mobiles sous R}
+}
+
+% Configuration pour les scripts R
+\lstdefinestyle{Rstyle}{
+	language=R,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{blue},
+	commentstyle=\color{green!60!black},
+	stringstyle=\color{red},
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=5pt,
+	backgroundcolor=\color{white},
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	frame=single,
+	tabsize=4,
+	captionpos=b,
+	breaklines=true,
+	breakatwhitespace=false
+}
+
+\lstnewenvironment{Rscript}{\lstset{style=Rstyle}}{}
+
+% Commandes personnalisées
+\newcommand{\R}{\texttt{R}}
+\newcommand{\CAH}{Classification Ascendante Hierarchique}
+\newcommand{\kmeans}{\textit{k}-means}
+
+\begin{document}
+	
+	% Page de garde
+	\begin{titlepage}
+		\begin{center}
+			\vspace*{1cm}
+			
+			\Large
+			\textbf{Universite d'Antananarivo}
+			
+			\vspace{0.5cm}
+			\Large
+			Faculte des Sciences
+			
+			\vspace{0.5cm}
+			\large
+			Mention Informatique et Technologie (MIT)
+			
+			\vspace{0.3cm}
+			\large
+			Grade : Master 1
+			
+			\vspace{0.3cm}
+			\large
+			Parcours : Innovation et Technologie (INT)
+			
+			\vspace{2cm}
+			
+			\Huge
+			\textbf{CLASSIFICATION HIERARCHIQUE ASCENDANTE\\
+				ET METHODE DES CENTRES MOBILES SOUS R}
+			
+			\vspace{0.5cm}
+			\Large
+			Etude des Habitudes de Vie Quotidienne
+			
+			\vspace{2cm}
+			
+			\large
+			\textbf{Nom :}\\
+			RABESIHARISON Tolotraniaina Henri
+			
+			\vspace{1cm}
+			
+			\large
+			9 juillet 2026
+			
+			\vspace{0.5cm}
+			\large
+			Annee universitaire : 2025 - 2026
+			
+		\end{center}
+	\end{titlepage}
+	
+	% Table des matières
+	\tableofcontents
+	\newpage
+	
+	% Avant-propos
+	\chapter*{Avant-propos}
+	\addcontentsline{toc}{chapter}{Avant-propos}
+	
+	Ce document a ete concu comme un ouvrage pedagogique destine a accompagner l'apprentissage des methodes de classification automatique, et plus particulierement de la Classification Ascendante Hierarchique (CAH) et de la methode des centres mobiles (\kmeans, egalement appelee methode des nuees dynamiques). Il s'inscrit dans le prolongement des enseignements de statistique exploratoire multidimensionnelle dispenses en Master 1, parcours Innovation et Technologie, a la Mention Informatique et Technologie de la Faculte des Sciences de l'Universite d'Antananarivo.
+	
+	L'objectif poursuivi est double. D'une part, exposer de facon rigoureuse mais accessible les fondements theoriques de ces deux approches complementaires de classification non supervisee. D'autre part, illustrer concretement leur mise en oeuvre a l'aide du logiciel \R, a travers une etude appliquee portant sur les habitudes de vie quotidienne d'un echantillon d'individus.
+	
+	La classification automatique occupe une place centrale dans l'analyse de donnees modernes : segmentation de clientele, typologie de comportements, structuration de grands volumes d'informations, aide a la decision. Comprendre la logique, les forces et les limites de la CAH et des centres mobiles constitue ainsi un socle indispensable pour tout praticien de la donnee.
+	
+	Ce livre s'adresse aux etudiants, mais aussi a toute personne souhaitant s'initier ou se perfectionner a la classification automatique sous \R.
+	
+	\newpage
+	
+	% Introduction générale
+	\chapter*{Introduction generale}
+	\addcontentsline{toc}{chapter}{Introduction generale}
+	
+	Dans de nombreux domaines — marketing, sociologie, biologie, economie, sciences de l'ingenieur — l'analyste est confronte a des jeux de donnees comportant un grand nombre d'individus decrits par plusieurs variables. Une question recurrente se pose alors : existe-t-il, au sein de cette population, des groupes homogenes d'individus qui se ressemblent entre eux et se distinguent des autres groupes ? Repondre a cette question releve de la classification automatique, egalement appelee analyse typologique ou clustering.
+	
+	Contrairement aux methodes supervisees, la classification automatique ne suppose aucune connaissance prealable de l'appartenance des individus a des groupes : c'est la structure meme des donnees qui doit reveler une typologie pertinente. Deux grandes familles de methodes se distinguent historiquement pour repondre a ce probleme : les methodes hierarchiques, dont la Classification Ascendante Hierarchique (CAH) est la plus emblematique, et les methodes de partitionnement, dont la methode des centres mobiles est la reference.
+	
+	La CAH construit progressivement, par aggregations successives des individus ou groupes d'individus les plus proches, une hierarchie de partitions representee sous la forme d'un arbre appele dendrogramme. La methode des centres mobiles, quant a elle, procede par reallocations iteratives des individus autour de centres de gravite (centroides) recalcules a chaque etape, jusqu'a convergence vers une partition stable en un nombre de classes $k$ fixe \textit{a priori}.
+	
+	Ces deux approches, loin d'etre concurrentes, sont en realite complementaires : la pratique statistique recommande frequemment de les combiner, en utilisant par exemple la CAH pour determiner un nombre de classes pertinent et initialiser les centres, puis la methode des centres mobiles pour consolider la partition obtenue. Cette demarche mixte, dite de « consolidation », permet de tirer parti a la fois de la richesse interpretative du dendrogramme et de la robustesse numerique de l'algorithme iteratif des centres mobiles.
+	
+	Le present ouvrage se structure en deux grandes parties. La premiere partie pose le cadre theorique : notions de distance et de similarite, principes de la CAH, principes de la methode des centres mobiles, et demarche de consolidation. La seconde partie propose une application complete sous le logiciel \R, a partir d'un jeu de donnees portant sur les habitudes de vie quotidienne (activite physique, sommeil, alimentation, temps d'ecran, etc.) d'un ensemble d'individus, permettant d'illustrer pas a pas l'ensemble de la demarche, du pretraitement des donnees jusqu'a l'interpretation des classes obtenues.
+	
+	\newpage
+	
+	% PARTIE I
+	\part{Cadre Theorique de la Classification Automatique}
+	
+	\chapter{Generalites sur la classification automatique}
+	
+	\section{Objectifs de la classification}
+	
+	La classification automatique, ou clustering, a pour objectif de repartir un ensemble d'individus decrits par plusieurs variables en un nombre restreint de groupes, appeles classes ou clusters, de telle sorte que :
+	
+	\begin{itemize}
+		\item les individus appartenant a une meme classe soient le plus homogenes possible (forte ressemblance intra-classe) ;
+		\item les classes soient le plus distinctes possible les unes des autres (forte heterogeneite inter-classes).
+	\end{itemize}
+	
+	Cette double exigence d'homogeneite intra-classe et de separation inter-classes constitue le fil conducteur de toutes les methodes de classification, qu'elles soient hierarchiques ou de partitionnement.
+	
+	\section{Notion de distance et de similarite}
+	
+	Toute methode de classification repose sur la definition d'une mesure de proximite entre individus. Lorsque les variables sont quantitatives, la distance euclidienne est la plus couramment utilisee. Pour deux individus $i$ et $j$ decrits par $p$ variables, elle s'ecrit :
+	
+	\[
+	d(i,j) = \sqrt{\sum_{k=1}^{p} (x_{ik} - x_{jk})^2}
+	\]
+	
+	D'autres distances existent selon la nature des donnees : distance de Manhattan (somme des ecarts absolus), distance de Minkowski (generalisation parametree), distance du Chi-deux (pour des donnees de comptage), ou encore des indices de similarite adaptes aux variables qualitatives (indice de Jaccard, de Dice, etc.).
+	
+	Un point essentiel, souvent neglige, concerne l'echelle des variables : lorsque celles-ci sont exprimees dans des unites differentes (par exemple des heures de sommeil et un nombre de pas quotidiens), une variable a forte variance peut dominer artificiellement le calcul des distances. Il est donc indispensable de proceder a un centrage-reduction des variables (standardisation) avant tout calcul de distance.
+	
+	\section{Les grandes familles de methodes}
+	
+	On distingue traditionnellement deux grandes familles de methodes de classification automatique.
+	
+	\subsection{Les methodes hierarchiques}
+	
+	Elles produisent une hierarchie complete de partitions emboitees, depuis la partition ou chaque individu forme sa propre classe jusqu'a la partition regroupant tous les individus en une seule classe. Cette hierarchie est representee graphiquement par un dendrogramme. La Classification Ascendante Hierarchique (CAH), procedant par aggregations successives, en est l'illustration la plus repandue ; il existe aussi une variante descendante (divisive), beaucoup moins utilisee en pratique.
+	
+	\subsection{Les methodes de partitionnement}
+	
+	Elles cherchent directement une partition en un nombre $k$ de classes fixe \textit{a priori}, en optimisant un critere numerique (le plus souvent la minimisation de l'inertie intra-classe). La methode des centres mobiles (\kmeans) est la representante la plus connue de cette famille. Contrairement a la CAH, elle ne fournit pas de hierarchie mais une unique partition, obtenue par un processus iteratif.
+	
+	\begin{table}[h]
+		\centering
+		\caption{Comparaison synthetique des deux grandes familles de methodes}
+		\label{tab:comparaison}
+		\begin{tabular}{p{3.5cm}p{4.5cm}p{4.5cm}}
+			\toprule
+			\textbf{Critere} & \textbf{CAH (hierarchique)} & \textbf{Centres mobiles (\kmeans)} \\
+			\midrule
+			Resultat produit & Hierarchie complete (dendrogramme) & Une seule partition en $k$ classes \\
+			Nombre de classes & Choisi \textit{a posteriori} (coupure de l'arbre) & Fixe \textit{a priori} \\
+			Complexite algorithmique & $O(n^2 \log n)$ a $O(n^3)$ & $O(n \cdot k \cdot i)$, tres rapide \\
+			Adaptee aux grands effectifs & Non (couteuse en memoire) & Oui \\
+			Stabilite du resultat & Deterministe & Depend de l'initialisation \\
+			Interpretation visuelle & Dendrogramme tres lisible & Nuage de points / projection \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\chapter{La Classification Ascendante Hierarchique (CAH)}
+	
+	\section{Principe general de l'algorithme}
+	
+	La CAH est une procedure iterative qui part de la partition la plus fine possible, dans laquelle chaque individu constitue a lui seul une classe, puis regroupe a chaque etape les deux classes les plus proches, jusqu'a n'obtenir plus qu'une seule classe regroupant l'ensemble des individus. L'algorithme se resume ainsi :
+	
+	\begin{enumerate}
+		\item Initialiser $n$ classes, chacune reduite a un individu.
+		\item Calculer la matrice des distances entre toutes les paires de classes.
+		\item Fusionner les deux classes les plus proches selon un critere d'agregation choisi.
+		\item Mettre a jour la matrice des distances en tenant compte de la nouvelle classe formee.
+		\item Repeter les etapes 3 et 4 jusqu'a ce qu'il ne reste qu'une seule classe.
+	\end{enumerate}
+	
+	Chaque fusion est enregistree avec la distance a laquelle elle s'est produite, ce qui permet de construire le dendrogramme, arbre binaire retracant l'historique complet des regroupements.
+	
+	\section{Les criteres d'agregation}
+	
+	La distance entre deux classes (et non plus entre deux individus) doit etre definie a chaque etape de l'algorithme. Le choix du critere d'agregation influence fortement la forme des classes obtenues.
+	
+	\subsection{Le lien simple (single linkage)}
+	
+	La distance entre deux classes est definie comme la plus petite distance entre un individu de la premiere classe et un individu de la seconde. Ce critere tend a produire des classes allongees (effet de chaine) et est sensible aux valeurs atypiques.
+	
+	\subsection{Le lien complet (complete linkage)}
+	
+	La distance entre deux classes est definie comme la plus grande distance entre un individu de la premiere classe et un individu de la seconde. Ce critere favorise des classes compactes et de diametre limite.
+	
+	\subsection{Le lien moyen (average linkage)}
+	
+	La distance entre deux classes est la moyenne de toutes les distances entre individus des deux classes. Ce critere constitue un compromis entre les deux precedents.
+	
+	\subsection{Le critere de Ward}
+	
+	Tres utilise en pratique, le critere de Ward ne repose plus directement sur une distance entre individus mais sur une perte d'inertie : a chaque etape, on fusionne les deux classes dont le regroupement entraine la plus faible augmentation de l'inertie intra-classe totale. Ce critere produit generalement des classes de tailles equilibrees et bien contrastees, ce qui en fait le choix par defaut recommande dans la plupart des etudes appliquees.
+	
+	\section{Le dendrogramme et le choix du nombre de classes}
+	
+	Le dendrogramme est une representation graphique en forme d'arbre, ou l'axe vertical (ou horizontal selon l'orientation) indique la distance (ou l'inertie) a laquelle chaque fusion a eu lieu. Plus une branche est haute, plus la fusion correspondante rapproche des classes dissemblables.
+	
+	Le choix du nombre de classes a retenir s'effectue generalement en reperant, sur le dendrogramme, le plus grand saut entre deux niveaux de fusion consecutifs : ce saut signale le passage d'un regroupement de classes proches a un regroupement de classes nettement plus eloignees, et constitue donc un bon indicateur du niveau de coupure a privilegier. On parle de regle du « saut d'inertie » ou de perte relative d'inertie.
+	
+	\section{Avantages et limites de la CAH}
+	
+	\begin{table}[h]
+		\centering
+		\caption{Avantages et limites de la CAH}
+		\label{tab:cah_avantages}
+		\begin{tabular}{p{6cm}p{6cm}}
+			\toprule
+			\textbf{Avantages} & \textbf{Limites} \\
+			\midrule
+			Fournit une hierarchie complete, exploitable a tout niveau de finesse & Cout de calcul eleve, peu adaptee aux grands volumes de donnees \\
+			Le dendrogramme offre une lecture visuelle riche de la structure des donnees & Une fusion est definitive : impossible de revenir sur une aggregation erronee \\
+			Aucun choix \textit{a priori} du nombre de classes & Sensibilite au critere d'agregation choisi et aux valeurs atypiques \\
+			Deterministe : un meme jeu de donnees donne toujours le meme resultat & Difficile a interpreter au-dela de quelques centaines d'individus \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\chapter{La methode des centres mobiles (\kmeans)}
+	
+	\section{Principe de l'algorithme}
+	
+	La methode des centres mobiles, popularisee sous le nom de \kmeans, appartient a la famille des methodes de partitionnement. Elle vise a repartir les $n$ individus en un nombre $k$ de classes fixe a l'avance, de maniere a minimiser l'inertie intra-classe totale, c'est-a-dire la somme des carres des distances entre chaque individu et le centre de gravite (centroide) de sa classe.
+	
+	Le nom « nuees dynamiques », propose par Edwin Diday, souligne le caractere mouvant des centres de classes au fil des iterations : chaque centre se deplace progressivement vers le barycentre des individus qui lui sont affectes, jusqu'a stabilisation.
+	
+	\section{Etapes de l'algorithme}
+	
+	\begin{enumerate}
+		\setcounter{enumi}{5}
+		\item Choisir $k$, le nombre de classes souhaite.
+		\item Selectionner aleatoirement $k$ individus (ou points) comme centres initiaux des classes.
+		\item Affecter chaque individu a la classe dont le centre est le plus proche (selon la distance euclidienne).
+		\item Recalculer le centre de chaque classe comme le barycentre (moyenne) des individus qui lui sont desormais affectes.
+		\item Repeter les etapes 3 et 4 jusqu'a ce que les affectations ne changent plus (convergence) ou qu'un nombre maximal d'iterations soit atteint.
+	\end{enumerate}
+	
+	Cet algorithme converge toujours vers un optimum local en un nombre fini d'iterations, mais rien ne garantit qu'il s'agisse de l'optimum global : le resultat final depend du choix des centres initiaux. En pratique, on relance l'algorithme plusieurs fois a partir d'initialisations differentes et l'on conserve la partition minimisant l'inertie intra-classe totale (parametre \texttt{nstart} sous \R).
+	
+	\section{Choix du nombre de classes $k$}
+	
+	Contrairement a la CAH, la methode des centres mobiles exige que le nombre $k$ soit fixe avant l'execution de l'algorithme. Deux approches complementaires permettent de guider ce choix.
+	
+	\subsection{La methode du coude (elbow method)}
+	
+	On execute l'algorithme pour des valeurs croissantes de $k$ et on trace l'evolution de l'inertie intra-classe totale en fonction de $k$. Cette courbe decroit naturellement lorsque $k$ augmente ; on retient la valeur de $k$ au-dela de laquelle le gain d'inertie devient marginal, ce qui se traduit graphiquement par un « coude » sur la courbe.
+	
+	\subsection{L'indice de silhouette}
+	
+	Pour chaque individu, l'indice de silhouette compare la distance moyenne a son propre groupe et la distance moyenne au groupe voisin le plus proche. Il varie entre -1 et 1 : une valeur proche de 1 indique un individu bien classe, une valeur proche de 0 indique une position ambigue entre deux classes, une valeur negative suggere un individu probablement mal classe. La moyenne des indices de silhouette sur l'ensemble des individus, calculee pour differentes valeurs de $k$, permet de retenir la partition la plus satisfaisante.
+	
+	\section{Avantages et limites}
+	
+	\begin{table}[h]
+		\centering
+		\caption{Avantages et limites de la methode des centres mobiles}
+		\label{tab:kmeans_avantages}
+		\begin{tabular}{p{6cm}p{6cm}}
+			\toprule
+			\textbf{Avantages} & \textbf{Limites} \\
+			\midrule
+			Tres rapide, adaptee aux grands jeux de donnees & Le nombre de classes $k$ doit etre fixe \textit{a priori} \\
+			Simple a mettre en oeuvre et a interpreter & Resultat sensible a l'initialisation des centres \\
+			Peut etre relancee facilement (\texttt{nstart}) & Suppose des classes de forme globalement spherique \\
+			Fonctionne bien sur variables quantitatives standardisees & Sensible aux valeurs atypiques (outliers) \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\chapter{Approche mixte : CAH et centres mobiles}
+	
+	\section{Complementarite des deux methodes}
+	
+	La CAH et la methode des centres mobiles presentent des qualites et des defauts largement complementaires. La CAH offre une vision hierarchique riche mais devient rapidement couteuse en temps de calcul et en memoire lorsque le nombre d'individus augmente. La methode des centres mobiles est rapide et efficace sur de grands effectifs, mais necessite de connaitre a l'avance le nombre de classes et reste sensible a l'initialisation.
+	
+	La pratique statistique a donc developpe une demarche dite de « consolidation », qui combine les deux methodes afin de cumuler leurs avantages respectifs tout en limitant leurs inconvenients.
+	
+	\section{Demarche de consolidation}
+	
+	La demarche de consolidation se deroule typiquement en trois temps :
+	
+	\begin{enumerate}
+		\setcounter{enumi}{10}
+		\item Une premiere classification par la methode des centres mobiles est realisee sur un nombre de classes volontairement eleve (par exemple une cinquantaine de micro-classes), afin de reduire le volume de donnees tout en preservant la structure fine du nuage de points.
+		\item Une CAH est ensuite appliquee, non plus sur les individus bruts, mais sur les centres de gravite de ces micro-classes, ponderes par leurs effectifs respectifs. Le dendrogramme obtenu permet de determiner un nombre de classes final pertinent.
+		\item Les centres de classes issus de la coupure du dendrogramme servent enfin de centres initiaux a une nouvelle execution de l'algorithme des centres mobiles, appliquee cette fois sur l'ensemble des individus d'origine, afin de consolider et d'affiner la partition finale.
+	\end{enumerate}
+	
+	Cette demarche, popularisee notamment par les travaux de l'ecole francaise d'analyse des donnees, permet de traiter efficacement de grands jeux de donnees tout en beneficiant de la lisibilite interpretative offerte par le dendrogramme. Dans le cadre de la presente etude, dont l'effectif reste modere, la CAH sera appliquee directement pour determiner le nombre de classes pertinent, puis la methode des centres mobiles sera utilisee pour consolider la partition, illustrant ainsi une version simplifiee de cette demarche mixte.
+	
+	\newpage
+	
+	% PARTIE II
+	\part{Application sous \R : Etude des Habitudes de Vie Quotidienne}
+	
+	\chapter{Presentation des donnees}
+	
+	\section{Contexte et description du jeu de donnees}
+	
+	L'etude proposee porte sur un ensemble d'individus decrits par plusieurs variables quantitatives relatives a leurs habitudes de vie quotidienne : duree moyenne de sommeil (en heures), temps quotidien d'activite physique (en minutes), temps quotidien passe devant un ecran (en heures), nombre de repas equilibres par semaine, quantite d'eau consommee par jour (en litres), et niveau de stress auto-evalue (echelle de 1 a 10). L'objectif est d'identifier, a partir de ces variables, des profils-types d'individus aux modes de vie homogenes.
+	
+	\section{Pretraitement des donnees}
+	
+	Les variables retenues etant exprimees dans des unites et des echelles heterogenes, une etape de centrage-reduction est indispensable avant tout calcul de distance, afin d'eviter qu'une variable a forte variance (par exemple le temps d'ecran, exprime en dizaines de minutes) ne domine artificiellement la classification au detriment d'une variable a faible variance (par exemple le nombre de repas equilibres). Sous \R, cette standardisation s'effectue simplement a l'aide de la fonction \texttt{scale()}.
+	
+	\begin{Rscript}
+		# Importation et preparation des donnees
+		data <- read.csv2("habitudes_vie.csv", row.names = 1)
+		str(data)
+		summary(data)
+		
+		# Centrage-reduction des variables quantitatives
+		data_cr <- scale(data)
+		head(round(data_cr, 2))
+	\end{Rscript}
+	
+	\chapter{Mise en oeuvre de la CAH sous \R}
+	
+	\section{Calcul de la matrice des distances}
+	
+	La premiere etape consiste a calculer la matrice des distances euclidiennes entre individus, a partir des donnees standardisees, a l'aide de la fonction \texttt{dist()}.
+	
+	\begin{Rscript}
+		# Matrice des distances euclidiennes
+		d <- dist(data_cr, method = "euclidean")
+	\end{Rscript}
+	
+	\section{Construction du dendrogramme}
+	
+	La fonction \texttt{hclust()} applique ensuite l'algorithme de Classification Ascendante Hierarchique a partir de cette matrice de distances. Le critere de Ward (\texttt{method = "ward.D2"}) est retenu, conformement aux recommandations usuelles pour obtenir des classes equilibrees et bien contrastees.
+	
+	\begin{Rscript}
+		# Classification Ascendante Hierarchique - critere de Ward
+		cah <- hclust(d, method = "ward.D2")
+		
+		# Representation graphique du dendrogramme
+		plot(cah, main = "Dendrogramme - CAH (critere de Ward)",
+		xlab = "Individus", ylab = "Hauteur (inertie)", cex = 0.6)
+		
+		# Visualisation des sauts d'inertie pour guider la coupure
+		inertie <- sort(cah$height, decreasing = TRUE)
+		plot(inertie[1:10], type = "b", pch = 19,
+		xlab = "Nombre de classes", ylab = "Inertie",
+		main = "Eboulis des inerties")
+	\end{Rscript}
+	
+	L'observation de l'eboulis des inerties (analogue au « scree plot » de l'ACP) permet de reperer le saut le plus marque entre deux niveaux de fusion successifs, indiquant ici une coupure pertinente en quatre classes.
+	
+	\section{Decoupage de l'arbre}
+	
+	Une fois le nombre de classes determine, la fonction \texttt{cutree()} permet d'obtenir directement le vecteur d'appartenance de chaque individu a sa classe.
+	
+	\begin{Rscript}
+		# Decoupage du dendrogramme en 4 classes
+		classes_cah <- cutree(cah, k = 4)
+		table(classes_cah)
+		
+		# Mise en couleur du dendrogramme selon les classes retenues
+		library(dendextend)
+		dend <- as.dendrogram(cah)
+		dend_colore <- color_branches(dend, k = 4)
+		plot(dend_colore, main = "Dendrogramme - 4 classes")
+		rect.hclust(cah, k = 4, border = 2:5)
+	\end{Rscript}
+	
+	\section{Interpretation des classes}
+	
+	L'interpretation des classes issues de la CAH s'appuie sur le calcul des moyennes de chaque variable au sein de chaque classe, comparees a la moyenne generale de l'echantillon. Cette description permet de caracteriser chaque groupe par un profil-type : par exemple, une classe pourra rassembler des individus presentant une duree de sommeil elevee, un temps d'ecran reduit et un niveau de stress faible, traduisant un mode de vie globalement equilibre, tandis qu'une autre classe pourra regrouper des individus au profil inverse.
+	
+	\begin{Rscript}
+		# Profil moyen de chaque classe
+		aggregate(data, by = list(classe = classes_cah), FUN = mean)
+	\end{Rscript}
+	
+	\chapter{Mise en oeuvre des centres mobiles sous \R}
+	
+	\section{Application de \texttt{kmeans()}}
+	
+	La fonction \texttt{kmeans()} implemente sous \R l'algorithme des centres mobiles. Le nombre de classes $k = 4$, determine au chapitre precedent a partir du dendrogramme, est repris ici afin de permettre une comparaison directe des deux methodes. Le parametre \texttt{nstart} permet de relancer l'algorithme plusieurs fois a partir d'initialisations differentes et de conserver la meilleure solution (celle qui minimise l'inertie intra-classe).
+	
+	\begin{Rscript}
+		# Methode des centres mobiles (k-means), k = 4
+		set.seed(123)
+		km <- kmeans(data_cr, centers = 4, nstart = 25)
+		km$size          # effectif de chaque classe
+		km$centers       # coordonnees des centres (donnees standardisees)
+		km$tot.withinss  # inertie intra-classe totale
+	\end{Rscript}
+	
+	\section{Determination du nombre optimal de classes}
+	
+	Afin de verifier la pertinence du choix $k = 4$, la methode du coude et l'indice de silhouette sont mobilises conjointement.
+	
+	\begin{Rscript}
+		# Methode du coude
+		inertie_intra <- sapply(1:10, function(k) {
+			kmeans(data_cr, centers = k, nstart = 25)$tot.withinss
+		})
+		plot(1:10, inertie_intra, type = "b", pch = 19,
+		xlab = "Nombre de classes k", ylab = "Inertie intra-classe",
+		main = "Methode du coude")
+		
+		# Indice de silhouette
+		library(cluster)
+		library(factoextra)
+		fviz_nbclust(data_cr, kmeans, method = "silhouette")
+	\end{Rscript}
+	
+	\section{Visualisation des classes}
+	
+	Le package \texttt{factoextra} offre une fonction \texttt{fviz\_cluster()} particulierement pratique pour visualiser les classes obtenues par \kmeans, en projetant les individus sur les deux premiers axes d'une analyse en composantes principales lorsque le nombre de variables initiales depasse deux.
+	
+	\begin{Rscript}
+		# Visualisation des classes sur le premier plan factoriel
+		fviz_cluster(km, data = data_cr,
+		geom = "point", ellipse.type = "convex",
+		palette = "jco", ggtheme = theme_minimal(),
+		main = "Classification par centres mobiles (k = 4)")
+	\end{Rscript}
+	
+	\chapter{Consolidation et comparaison des resultats}
+	
+	\section{Croisement CAH / k-means}
+	
+	Une etape essentielle de validation consiste a comparer les partitions obtenues respectivement par la CAH et par la methode des centres mobiles, a l'aide d'un tableau croise. Une forte concordance entre les deux partitions renforce la confiance dans la typologie obtenue.
+	
+	\begin{Rscript}
+		# Tableau de comparaison des deux partitions
+		table(CAH = classes_cah, KMEANS = km$cluster)
+		
+		# Indice de concordance (Rand ajuste)
+		library(mclust)
+		adjustedRandIndex(classes_cah, km$cluster)
+	\end{Rscript}
+	
+	Un indice de Rand ajuste proche de 1 traduit une forte concordance entre les deux methodes, confirmant la stabilite et la robustesse de la typologie en quatre classes retenue pour cette etude.
+	
+	\section{Profils des classes obtenues}
+	
+	La consolidation finale des classes, realisee en utilisant les centres issus de la CAH comme points de depart de l'algorithme des centres mobiles, permet d'aboutir a une typologie stabilisee des individus selon leurs habitudes de vie quotidienne. Quatre profils-types se degagent generalement de ce type d'etude :
+	
+	\begin{itemize}
+		\item \textbf{Classe 1 — « Mode de vie equilibre »} : sommeil suffisant, activite physique reguliere, temps d'ecran modere, stress faible.
+		\item \textbf{Classe 2 — « Sedentaires connectes »} : temps d'ecran eleve, activite physique faible, sommeil de qualite moyenne.
+		\item \textbf{Classe 3 — « Actifs sous tension »} : activite physique elevee mais niveau de stress egalement eleve et sommeil reduit.
+		\item \textbf{Classe 4 — « Vie irreguliere »} : alimentation peu structuree, hydratation insuffisante, sommeil tres variable.
+	\end{itemize}
+	
+	Ces profils, purement illustratifs, doivent bien entendu etre valides et affines au regard des resultats effectivement obtenus sur le jeu de donnees reel etudie.
+	
+	\section{Interpretation et recommandations}
+	
+	Au-dela de la seule description statistique, l'interet d'une telle typologie reside dans son exploitation pratique : orientation de campagnes de sensibilisation a la sante publique ciblees par profil, adaptation de programmes d'accompagnement individualises, ou encore identification de leviers d'action prioritaires selon le groupe considere. La combinaison de la CAH et de la methode des centres mobiles, en offrant a la fois une lecture hierarchique et une partition consolidee robuste, constitue ainsi un outil precieux d'aide a la decision fonde sur les donnees.
+	
+	\newpage
+	
+	% Conclusion generale
+	\chapter*{Conclusion generale}
+	\addcontentsline{toc}{chapter}{Conclusion generale}
+	
+	Ce livre a presente, de facon progressive, les fondements theoriques et la mise en oeuvre pratique de deux methodes complementaires de classification automatique : la Classification Ascendante Hierarchique et la methode des centres mobiles. La premiere offre une vision hierarchique riche, materialisee par le dendrogramme, permettant d'explorer la structure des donnees a differents niveaux de finesse. La seconde, plus rapide et mieux adaptee aux grands effectifs, permet d'obtenir directement une partition consolidee en un nombre de classes fixe.
+	
+	L'application conduite sur un jeu de donnees relatif aux habitudes de vie quotidienne a permis d'illustrer concretement l'ensemble de la demarche sous \R : preparation et standardisation des donnees, construction et lecture du dendrogramme, choix du nombre de classes, execution de l'algorithme des centres mobiles, validation croisee des deux partitions, et enfin interpretation des profils-types obtenus.
+	
+	Cette etude confirme l'interet d'une demarche mixte, combinant les atouts respectifs de la CAH et des centres mobiles, pour obtenir une typologie a la fois interpretable et statistiquement robuste. Elle ouvre egalement la voie a des approfondissements possibles : integration de variables qualitatives supplementaires, comparaison avec d'autres methodes de classification (classification par densite, melanges gaussiens), ou encore couplage avec une analyse factorielle prealable (ACP) afin de resumer l'information avant classification, notamment lorsque le nombre de variables initiales est important.
+	
+	\newpage
+	
+	% Bibliographie
+	\chapter*{Bibliographie}
+	\addcontentsline{toc}{chapter}{Bibliographie}
+	
+	\begin{enumerate}[leftmargin=*, label={[\arabic*]}]
+		\item Ward J.H. (1963). Hierarchical Grouping to Optimize an Objective Function. \textit{Journal of the American Statistical Association}.
+		\item MacQueen J. (1967). Some Methods for Classification and Analysis of Multivariate Observations. \textit{Proceedings of the Fifth Berkeley Symposium}.
+		\item Diday E. (1971). La methode des nuees dynamiques. \textit{Revue de statistique appliquee}.
+		\item Lebart L., Piron M., Morineau A. (2006). \textit{Statistique exploratoire multidimensionnelle}. Dunod.
+		\item Husson F., Le S., Pages J. (2016). \textit{Analyse de donnees avec R}. Presses Universitaires de Rennes.
+		\item Kaufman L., Rousseeuw P.J. (1990). \textit{Finding Groups in Data: An Introduction to Cluster Analysis}. Wiley.
+		\item Documentation officielle des packages \R : \texttt{stats}, \texttt{cluster}, \texttt{factoextra}, \texttt{dendextend}, \texttt{mclust}.
+	\end{enumerate}
+	
+\end{document}u
